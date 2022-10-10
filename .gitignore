@@ -30,3 +30,4 @@ yarn-error.log*
 build.sbt
 sbt-launch.jar
 sbt.bat
+*.pdf
