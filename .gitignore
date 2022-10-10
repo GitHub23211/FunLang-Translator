@@ -31,3 +31,4 @@ build.sbt
 sbt-launch.jar
 sbt.bat
 *.pdf
+*.html
