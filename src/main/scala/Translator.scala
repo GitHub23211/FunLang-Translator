@@ -116,6 +116,11 @@ object Translator {
             genall (translateExpression (r))
             gen (ICons ())
 
+        case IfExp(condExp, thenExp, elseExp) => {
+            genall(translateExpression(condExp))
+            gen(IBranch(translateExpression(thenExp), translateExpression(elseExp)))
+        }
+
         // FIXME
         // handle:
         //    IfExp
@@ -133,6 +138,10 @@ object Translator {
 
         // Gather the expression's instructions and return them
         expInstrBuffer.result ()
+
+    }
+
+    def translateCond(cond: Exp) {
 
     }
 
