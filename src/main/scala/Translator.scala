@@ -116,9 +116,19 @@ object Translator {
             genall (translateExpression (r))
             gen (ICons ())
 
+        case ListExp(exps) => {
+            exps.foreach(exp => genall(translateExpression(exp)))
+            gen(INil())
+            (0 until exps.length).foreach(x => gen(ICons()))
+        }
+
         case IfExp(condExp, thenExp, elseExp) => {
             genall(translateExpression(condExp))
             gen(IBranch(translateExpression(thenExp), translateExpression(elseExp)))
+        }
+
+        case AppExp(funExp, argExp) => {
+            genall(translateExpression(funExp))
         }
 
         // FIXME

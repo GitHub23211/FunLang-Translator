@@ -83,7 +83,7 @@ class SECMachine (emitter : Emitter) extends PrettyPrinter {
 
         // Tracing: uncomment these to print out each instruction or other parts
         // of the state before each instruction is executed.
-        // println (s"instr = $instr")
+        println (s"instr = $instr")
 
         /**
          * Helper function to lookup a name in the current environment and return
