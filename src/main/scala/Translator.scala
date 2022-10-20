@@ -67,6 +67,11 @@ object Translator {
             gen (IClosure (argName, bodyInstrs :+ IPopEnv ()))
         }
 
+        def appExpHelper(func: Instr, argExp: Exp) = {
+            genall(translateExpression(argExp))
+            gen(func)
+        }
+
         exp match {
 
         case IdnUse (value) =>
@@ -116,20 +121,29 @@ object Translator {
             genall (translateExpression (r))
             gen (ICons ())
 
-        case ListExp(exps) => {
+        case ListExp (exps) => 
             exps.foreach(exp => genall(translateExpression(exp)))
             gen(INil())
             (0 until exps.length).foreach(x => gen(ICons()))
-        }
 
-        case IfExp(condExp, thenExp, elseExp) => {
+        case IfExp (condExp, thenExp, elseExp) => 
             genall(translateExpression(condExp))
             gen(IBranch(translateExpression(thenExp), translateExpression(elseExp)))
-        }
 
-        case AppExp(funExp, argExp) => {
-            genall(translateExpression(funExp))
-        }
+        case AppExp (funExp, argExp) => 
+            funExp match {
+                case IdnUse(r) if(r == "head")   => appExpHelper(IHead(), argExp)
+                case IdnUse(r) if(r == "tail")   => appExpHelper(ITail(), argExp)
+                case IdnUse(r) if(r == "length") => appExpHelper(ILength(), argExp)
+                case _                           => {
+                    genall(translateExpression(funExp))
+                    genall(translateExpression(argExp))
+                    gen(ICall())
+                }
+            }
+
+        case BlockExp (defns, exp) => 
+            genall(translateExpression(translateDefn(defns(0), exp)))
 
         // FIXME
         // handle:
@@ -146,13 +160,14 @@ object Translator {
             gen (IPrint ())
         }
 
+        def translateDefn(defn: Defn, body: Exp):Exp = {
+            defn match {
+                case Defn(idndef, exp) => AppExp(LamExp(idndef, body), exp)
+            }
+        }
+
         // Gather the expression's instructions and return them
         expInstrBuffer.result ()
 
     }
-
-    def translateCond(cond: Exp) {
-
-    }
-
 }

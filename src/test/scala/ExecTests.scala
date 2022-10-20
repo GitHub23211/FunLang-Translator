@@ -568,9 +568,22 @@ class ExecTests extends ParseTests {
                 "3")
     }
 
-
-
+    // ================================================================
+    //
     // FIXME: more tests here...
 
+    test ("APP EXP: tail(List(2, 1, 4))") {
+        execTest ("""
+            |tail(List(2, 1, 4))
+            """.stripMargin,
+            "List(1, 4)")
+    }
+
+    test ("APP EXP: length(List(2, 1, 4))") {
+        execTest ("""
+            |length(List(2, 1, 4))
+            """.stripMargin,
+            "3")
+    }
 }
 
