@@ -142,8 +142,8 @@ object Translator {
                 }
             }
 
-        case BlockExp (defns, exp) => 
-            genall(translateExpression(translateDefn(defns(0), exp)))
+        case BlockExp (defns, exp) =>
+            genall(translateExpression(translateMultipleDefns(defns, exp)))
 
         // FIXME
         // handle:
@@ -158,6 +158,13 @@ object Translator {
 
         case _ =>
             gen (IPrint ())
+        }
+
+        def translateMultipleDefns(defns: Vector[Defn], exp: Exp):Exp = {
+            defns match {
+                case h +: t => translateDefn(h, translateMultipleDefns(t, exp))
+                case _ => exp
+            }
         }
 
         def translateDefn(defn: Defn, body: Exp):Exp = {
