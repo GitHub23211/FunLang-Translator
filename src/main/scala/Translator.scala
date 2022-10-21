@@ -67,9 +67,22 @@ object Translator {
             gen (IClosure (argName, bodyInstrs :+ IPopEnv ()))
         }
 
-        def appExpHelper(func: Instr, argExp: Exp) = {
+        def appExpHelper(instr: Instr, argExp: Exp) = {
             genall(translateExpression(argExp))
-            gen(func)
+            gen(instr)
+        }
+
+        def translateMultipleDefns(defns: Vector[Defn], exp: Exp):Exp = {
+            defns match {
+                case h +: t => translateDefn(h, translateMultipleDefns(t, exp))
+                case _ => exp
+            }
+        }
+
+        def translateDefn(defn: Defn, body: Exp):Exp = {
+            defn match {
+                case Defn(idndef, exp) => AppExp(LamExp(idndef, body), exp)
+            }
         }
 
         exp match {
@@ -158,19 +171,6 @@ object Translator {
 
         case _ =>
             gen (IPrint ())
-        }
-
-        def translateMultipleDefns(defns: Vector[Defn], exp: Exp):Exp = {
-            defns match {
-                case h +: t => translateDefn(h, translateMultipleDefns(t, exp))
-                case _ => exp
-            }
-        }
-
-        def translateDefn(defn: Defn, body: Exp):Exp = {
-            defn match {
-                case Defn(idndef, exp) => AppExp(LamExp(idndef, body), exp)
-            }
         }
 
         // Gather the expression's instructions and return them
