@@ -85,6 +85,25 @@ object Translator {
             }
         }
 
+        
+        def translateCases(cases: Vector[(Pat, Exp)], matchExp: Exp):Exp = {
+            cases match {
+                case h +: t => translateCase(h, IdnUse("x"), translateCases(t, matchExp))
+                case _ => IntExp(999)
+            }
+        }
+
+        def translateCase(c: (Pat, Exp), matchExp: Exp, elseExp: Exp):Exp = {
+            c match {
+                case (LiteralPat(patExp), thenExp) => IfExp(EqualExp(matchExp, patExp), thenExp, elseExp)
+                case (IdentPat(patString), exp) => AppExp(LamExp(IdnDef(patString, UnknownType()), exp), matchExp)
+                // case (ConsPat(leftPat, rightPat), )
+                // case (ListPat(pats), )
+                case (AnyPat(), exp) => exp
+                case _ => IntExp(999)
+            }
+        }
+
         exp match {
 
         case IdnUse (value) =>
@@ -159,9 +178,6 @@ object Translator {
             genall(translateExpression(translateMultipleDefns(defns, exp)))
         
         case MatchExp(exp, cases) => 
-            //MatchExp (exp : Exp, cases : Vector[(Pat,Exp)])
-            //if (exp1 == pat) then exp2
-            // genall(translateExpression(IfExp(EqualExp(IntExp(4), IntExp(3)), IntExp(2), IntExp(999))))
             genall(translateExpression(AppExp(LamExp(IdnDef("x", UnknownType()), translateCases(cases, exp)), exp)))
 
 
@@ -179,24 +195,6 @@ object Translator {
 
         case _ =>
             gen (IPrint ())
-        }
-
-        def translateCases(cases: Vector[(Pat, Exp)], matchExp: Exp):Exp = {
-            cases match {
-                case h +: t => translateCase(h, IdnUse("x"), translateCases(t, matchExp))
-                case _ => IntExp(999)
-            }
-        }
-
-        def translateCase(c: (Pat, Exp), matchExp: Exp, elseExp: Exp):Exp = {
-            c match {
-                case (LiteralPat(patExp), thenExp) => IfExp(EqualExp(matchExp, patExp), thenExp, elseExp)
-                case (IdentPat(patString), exp) => AppExp(LamExp(IdnDef(patString, UnknownType()), exp), matchExp)
-                // case (ConsPat(leftPat, rightPat), )
-                // case (ListPat(pats), )
-                case (AnyPat(), exp) => exp
-                case _ => IntExp(999)
-            }
         }
 
         // Gather the expression's instructions and return them
