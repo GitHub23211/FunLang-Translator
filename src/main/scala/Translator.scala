@@ -102,15 +102,30 @@ object Translator {
                 case (LiteralPat(patExp), thenExp) => IfExp(EqualExp(matchExp, patExp), thenExp, elseExp)
                 case (IdentPat(patString), exp) => AppExp(LamExp(IdnDef(patString, UnknownType()), exp), matchExp)
                 // case (ConsPat(leftPat, rightPat), )
-                case (ListPat(pats), thenExp) => IfExp(EqualExp(checkListLength(pats, matchExp), BoolExp(true)), thenExp, elseExp)
+                case (ListPat(pats), thenExp) => translateListPat(pats, matchExp, thenExp, elseExp)
                 case (AnyPat(), exp) => exp
                 case _ => IntExp(999)
             }
         }
+        
+        def findIdentPat(pats:Vector[Pat]):String = {
+            pats match {
+                case h +: t => getIdentPat(h) + findIdentPat(t)
+                case _ => ""
+            }
+        }
 
-        // def translateListPat(pats:Vector[Pat], matchExp:Exp, thenExp:Exp, elseExp:Exp):Exp = {
-        //      IfExp(EqualExp(checkListLength(pats, matchExp), BoolExp(true)), thenExp, elseExp)
-        // }
+        def getIdentPat(pat:Pat):String = {
+            pat match {
+                case IdentPat(string) => {print("string: " + string + "\n\n"); string}
+                case _ => ""
+            }
+        }
+
+        def translateListPat(pats:Vector[Pat], matchExp:Exp, thenExp:Exp, elseExp:Exp):Exp = {
+            print("THEN EXP: " + thenExp + "\n\n")
+            IfExp(EqualExp(checkListLength(pats, matchExp), BoolExp(true)), AppExp(LamExp(IdnDef(findIdentPat(pats), UnknownType()), thenExp), matchExp), elseExp)
+        }
 
         def checkListLength(pats:Vector[Pat], matchExp:Exp) = {
             IfExp(EqualExp(listOperation("length", matchExp), IntExp(pats.length)), translateListPats(pats, matchExp), BoolExp(false))
