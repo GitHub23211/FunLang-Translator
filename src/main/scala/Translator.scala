@@ -114,7 +114,7 @@ object Translator {
             c match {
                 case (LiteralPat(patExp), thenExp) => IfExp(EqualExp(matchExp, patExp), thenExp, elseExp)
                 case (IdentPat(patString), exp) => AppExp(LamExp(IdnDef(patString, UnknownType()), exp), matchExp)
-                case (ConsPat(leftPat, rightPat), thenExp) => translateListPat(Vector(leftPat, rightPat), matchExp, thenExp, elseExp)
+                case (ConsPat(leftPat, rightPat), thenExp) => translateConPat(leftPat, rightPat, matchExp, thenExp, elseExp)
                 case (ListPat(pats), thenExp) => translateListPat(pats, matchExp, thenExp, elseExp)
                 case (AnyPat(), exp) => exp
                 case _ => IntExp(999)
@@ -130,7 +130,6 @@ object Translator {
         }
 
         def listThenExp(pats:Vector[Pat], thenExp:Exp, matchExp:Exp):Exp = {
-            print("\n\n THEN EXP: " + thenExp + "\n\n")
             pats match {
                 case h +: t => AppExp(LamExp(IdnDef(getIdentPat(h), UnknownType()), listThenExp(t, thenExp, listOperation("tail", matchExp))), listOperation("head", matchExp))
                 case _ => thenExp
@@ -145,7 +144,7 @@ object Translator {
         }
 
         def checkListLength(pats:Vector[Pat], matchExp:Exp) = {
-            IfExp(EqualExp(listOperation("length", matchExp), IntExp(0)), BoolExp(false), translateListPats(pats, matchExp))
+            IfExp(EqualExp(listOperation("length", matchExp), IntExp(pats.length)), translateListPats(pats, matchExp), BoolExp(false))
         }
 
         def translateListPats(pats:Vector[Pat], matchExp:Exp):Exp = {
@@ -174,7 +173,8 @@ object Translator {
 
         def consThenExp(pats:Vector[Pat], thenExp:Exp, matchExp:Exp):Exp = {
             pats match {
-                case h +: t => AppExp(LamExp(IdnDef(getIdentPat(h), UnknownType()), listThenExp(t, thenExp, listOperation("tail", matchExp))), listOperation("head", matchExp))
+                case h +: Vector() => AppExp(LamExp(IdnDef(getIdentPat(h), UnknownType()), consThenExp(Vector(), thenExp, listOperation("tail", matchExp))), matchExp)
+                case h +: t => AppExp(LamExp(IdnDef(getIdentPat(h), UnknownType()), consThenExp(t, thenExp, listOperation("tail", matchExp))), listOperation("head", matchExp))
                 case _ => thenExp
             }
         }
