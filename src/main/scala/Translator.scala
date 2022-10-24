@@ -130,6 +130,7 @@ object Translator {
         }
 
         def listThenExp(pats:Vector[Pat], thenExp:Exp, matchExp:Exp):Exp = {
+            print("\n\n THEN EXP: " + thenExp + "\n\n")
             pats match {
                 case h +: t => AppExp(LamExp(IdnDef(getIdentPat(h), UnknownType()), listThenExp(t, thenExp, listOperation("tail", matchExp))), listOperation("head", matchExp))
                 case _ => thenExp
