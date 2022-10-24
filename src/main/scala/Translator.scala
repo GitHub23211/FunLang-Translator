@@ -67,14 +67,24 @@ object Translator {
             gen (IClosure (argName, bodyInstrs :+ IPopEnv ()))
         }
 
+       /**
+        *  AppExp helper functions
+        */
+        
+        /* Used to generate IHead, ITail and ILength instructions */
         def appExpHelper(instr: Instr, argExp: Exp) = {
             genall(translateExpression(argExp))
             gen(instr)
         }
 
+        /* Used to apply IHead, ITail and ILength instructions to a list */
         def listOperation(name:String, list:Exp):Exp = {
             AppExp(IdnUse(name), list)
         }
+
+       /**
+        *   BlockExp helper functions
+        */
 
         def translateMultipleDefns(defns: Vector[Defn], exp: Exp):Exp = {
             defns match {
@@ -89,7 +99,10 @@ object Translator {
             }
         }
 
-        
+       /**
+        *   MatchExp helper functions
+        */
+
         def translateCases(cases: Vector[(Pat, Exp)], matchExp: Exp):Exp = {
             cases match {
                 case h +: t => translateCase(h, IdnUse("x"), translateCases(t, matchExp))
@@ -101,26 +114,19 @@ object Translator {
             c match {
                 case (LiteralPat(patExp), thenExp) => IfExp(EqualExp(matchExp, patExp), thenExp, elseExp)
                 case (IdentPat(patString), exp) => AppExp(LamExp(IdnDef(patString, UnknownType()), exp), matchExp)
-                // case (ConsPat(leftPat, rightPat), )
+                case (ConsPat(leftPat, rightPat), thenExp)
                 case (ListPat(pats), thenExp) => translateListPat(pats, matchExp, thenExp, elseExp)
                 case (AnyPat(), exp) => exp
                 case _ => IntExp(999)
             }
         }
         
-        def findIdentPat(pats:Vector[Pat]):String = {
-            pats match {
-                case h +: t => getIdentPat(h) + findIdentPat(t)
-                case _ => ""
-            }
-        }
+       /**
+        *   Helper functions that deal with matching ListPats
+        */
 
         def translateListPat(pats:Vector[Pat], matchExp:Exp, thenExp:Exp, elseExp:Exp):Exp = {
             IfExp(EqualExp(checkListLength(pats, matchExp), BoolExp(true)), listThenExp(pats, thenExp, matchExp), elseExp)
-        }
-
-        def checkListLength(pats:Vector[Pat], matchExp:Exp) = {
-            IfExp(EqualExp(listOperation("length", matchExp), IntExp(pats.length)), translateListPats(pats, matchExp), BoolExp(false))
         }
 
         def listThenExp(pats:Vector[Pat], thenExp:Exp, matchExp:Exp):Exp = {
@@ -132,9 +138,13 @@ object Translator {
 
         def getIdentPat(pat:Pat):String = {
             pat match {
-                case IdentPat(string) => {print("\n\nSTRING "+ string + "\n\n"); string}
+                case IdentPat(string) => string
                 case _ => ""
             }
+        }
+
+        def checkListLength(pats:Vector[Pat], matchExp:Exp) = {
+            IfExp(EqualExp(listOperation("length", matchExp), IntExp(pats.length)), translateListPats(pats, matchExp), BoolExp(false))
         }
 
         def translateListPats(pats:Vector[Pat], matchExp:Exp):Exp = {
