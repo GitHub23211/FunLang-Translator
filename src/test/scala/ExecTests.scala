@@ -585,5 +585,76 @@ class ExecTests extends ParseTests {
             """.stripMargin,
             "3")
     }
+
+    test ("Assign block statements to value") {
+        execTest ("""
+            |{
+            |   val num : Int = 90;
+            |   val x: Int = {
+            |       val y : Int = 23;
+            |       def triple(x:Int):Int = x * 3;
+            |       if (triple(y) * triple(y) < triple(triple(y)))
+            |           y
+            |       else
+            |           triple(y)
+            |   };
+            |   def sum(i:Int):Int = i match {
+            |       case 300 => i - num
+            |       case _ => i + num
+            |   };
+            |   sum(x)
+            |}
+            """.stripMargin,
+            "159")
+    }
+
+    test ("Multiple and bracketed block statements") {
+        execTest ("""
+            {
+                val a : Int = 5;
+                def fac(x:Int):Int = x match {
+                    case 0 => 1
+                    case a => a * fac(a - 1)
+                    case _ => 1
+                };
+                fac(a) * 2
+            } 
+            /
+            (
+                {
+                    def square(x:Int):Int = x * x;
+                    square(5)
+                }
+                +
+                {
+                    val a : Int = 2;
+                    val b : Int = 5;
+                    val c : Int = 10;
+                    ((x:Int) => 1 + ((y:Int) => y * 2)(x)) (a) * b + c
+                }
+            )
+            """.stripMargin,
+            "4")
+    }
+
+    test("Fibonnaci function") {
+        execTest("""
+            {
+                val x : Int = 9;
+                def fibonnaci(n:Int):Int = 
+                    n match {
+                        case 0 => 0
+                        case 1 => 1
+                        case _ => fibonnaci(n - 1) + fibonnaci(n - 2)
+                    };
+                fibonnaci(x)
+            } 
+        """.stripMargin,
+        "34")
+    }
+
+
+
+    
 }
 
