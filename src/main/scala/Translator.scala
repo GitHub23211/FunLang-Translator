@@ -114,7 +114,7 @@ object Translator {
             c match {
                 case (LiteralPat(patExp), thenExp) => IfExp(EqualExp(matchExp, patExp), thenExp, elseExp)
                 case (IdentPat(patString), exp) => AppExp(LamExp(IdnDef(patString, UnknownType()), exp), matchExp)
-                case (ConsPat(leftPat, rightPat), thenExp)
+                // case (ConsPat(leftPat, rightPat), thenExp)
                 case (ListPat(pats), thenExp) => translateListPat(pats, matchExp, thenExp, elseExp)
                 case (AnyPat(), exp) => exp
                 case _ => IntExp(999)
