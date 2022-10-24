@@ -114,7 +114,7 @@ object Translator {
             c match {
                 case (LiteralPat(patExp), thenExp) => IfExp(EqualExp(matchExp, patExp), thenExp, elseExp)
                 case (IdentPat(patString), exp) => AppExp(LamExp(IdnDef(patString, UnknownType()), exp), matchExp)
-                case (ConsPat(leftPat, rightPat), thenExp)
+                case (ConsPat(leftPat, rightPat), thenExp) => translateListPat(Vector(leftPat, rightPat), matchExp, thenExp, elseExp)
                 case (ListPat(pats), thenExp) => translateListPat(pats, matchExp, thenExp, elseExp)
                 case (AnyPat(), exp) => exp
                 case _ => IntExp(999)
@@ -144,7 +144,7 @@ object Translator {
         }
 
         def checkListLength(pats:Vector[Pat], matchExp:Exp) = {
-            IfExp(EqualExp(listOperation("length", matchExp), IntExp(pats.length)), translateListPats(pats, matchExp), BoolExp(false))
+            IfExp(EqualExp(listOperation("length", matchExp), IntExp(0)), BoolExp(false), translateListPats(pats, matchExp))
         }
 
         def translateListPats(pats:Vector[Pat], matchExp:Exp):Exp = {
@@ -163,6 +163,37 @@ object Translator {
                 case _ => BoolExp(false)
             }
         }
+
+      /**
+        *   Helper functions that deal with matching ConPats
+        */
+        def translateConPat(leftPat:Pat, rightPat:Pat, matchExp:Exp, thenExp:Exp, elseExp:Exp):Exp = {
+            IfExp(EqualExp(checkListLengthCon(leftPat, matchExp), BoolExp(true)), consThenExp(Vector(leftPat, rightPat), thenExp, matchExp), elseExp)
+        }
+
+        def consThenExp(pats:Vector[Pat], thenExp:Exp, matchExp:Exp):Exp = {
+            pats match {
+                case h +: t => AppExp(LamExp(IdnDef(getIdentPat(h), UnknownType()), listThenExp(t, thenExp, listOperation("tail", matchExp))), listOperation("head", matchExp))
+                case _ => thenExp
+            }
+        }
+
+        def checkListLengthCon(leftPat:Pat, matchExp:Exp):Exp = {
+            IfExp(EqualExp(listOperation("length", matchExp), IntExp(0)), BoolExp(false), checkConsPat(leftPat, matchExp))
+        }
+
+        def checkConsPat(leftPat:Pat, matchExp:Exp):Exp = {
+            leftPat match {
+                case LiteralPat(exp) => IfExp(EqualExp(listOperation("head", matchExp), exp), BoolExp(true), BoolExp(false))
+                case IdentPat(_) => BoolExp(true)
+                case AnyPat() => BoolExp(true)
+                case _ => BoolExp(false)
+            }
+        }
+
+      /**
+        *   End of helper functions
+        */
 
         exp match {
 
