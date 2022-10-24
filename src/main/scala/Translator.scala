@@ -72,6 +72,10 @@ object Translator {
             gen(instr)
         }
 
+        def listOperation(name:String, list:Exp):Exp = {
+            AppExp(IdnUse(name), list)
+        }
+
         def translateMultipleDefns(defns: Vector[Defn], exp: Exp):Exp = {
             defns match {
                 case h +: t => translateDefn(h, translateMultipleDefns(t, exp))
@@ -98,9 +102,55 @@ object Translator {
                 case (LiteralPat(patExp), thenExp) => IfExp(EqualExp(matchExp, patExp), thenExp, elseExp)
                 case (IdentPat(patString), exp) => AppExp(LamExp(IdnDef(patString, UnknownType()), exp), matchExp)
                 // case (ConsPat(leftPat, rightPat), )
-                // case (ListPat(pats), )
+                case (ListPat(pats), thenExp) => translateListPat(pats, matchExp, thenExp, elseExp)
                 case (AnyPat(), exp) => exp
                 case _ => IntExp(999)
+            }
+        }
+        
+        def findIdentPat(pats:Vector[Pat]):String = {
+            pats match {
+                case h +: t => getIdentPat(h) + findIdentPat(t)
+                case _ => ""
+            }
+        }
+
+        def translateListPat(pats:Vector[Pat], matchExp:Exp, thenExp:Exp, elseExp:Exp):Exp = {
+            IfExp(EqualExp(checkListLength(pats, matchExp), BoolExp(true)), listThenExp(pats, thenExp, matchExp), elseExp)
+        }
+
+        def checkListLength(pats:Vector[Pat], matchExp:Exp) = {
+            IfExp(EqualExp(listOperation("length", matchExp), IntExp(pats.length)), translateListPats(pats, matchExp), BoolExp(false))
+        }
+
+        def listThenExp(pats:Vector[Pat], thenExp:Exp, matchExp:Exp):Exp = {
+            pats match {
+                case h +: t => AppExp(LamExp(IdnDef(getIdentPat(h), UnknownType()), listThenExp(t, thenExp, listOperation("tail", matchExp))), listOperation("head", matchExp))
+                case _ => thenExp
+            }
+        }
+
+        def getIdentPat(pat:Pat):String = {
+            pat match {
+                case IdentPat(string) => {print("\n\nSTRING "+ string + "\n\n"); string}
+                case _ => ""
+            }
+        }
+
+        def translateListPats(pats:Vector[Pat], matchExp:Exp):Exp = {
+            pats match {
+                case pat +: t => IfExp(EqualExp(checkListPat(pat, matchExp), BoolExp(true)), 
+                                        translateListPats(t, listOperation("tail", matchExp)), BoolExp(false))
+                case _ => BoolExp(true)
+            }
+        }
+
+        def checkListPat(pat:Pat, matchExp:Exp):Exp = {
+            pat match {
+                case LiteralPat(exp) => IfExp(EqualExp(listOperation("head", matchExp), exp), BoolExp(true), BoolExp(false))
+                case IdentPat(_) => BoolExp(true)
+                case AnyPat() => BoolExp(true)
+                case _ => BoolExp(false)
             }
         }
 
