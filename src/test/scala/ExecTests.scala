@@ -658,7 +658,7 @@ class ExecTests extends ParseTests {
     test("Get list head then cons to existing list") {
         execTest("""
         {
-            val arr : List[Int] = List(1, 2, 3);
+            val arr : List[Int] = List(7, 8, 9);
             def getHead(l:List[Int]):List[Int] = l match {
                 case h :: t => h
             };
@@ -666,7 +666,7 @@ class ExecTests extends ParseTests {
             getHead((2::(1 :: arr))) :: pushOne(arr)
         }
         """.stripMargin,
-        "List(2, 1, 1, 2, 3)")
+        "List(2, 1, 7, 8, 9)")
     }    
 }
 
