@@ -572,21 +572,47 @@ class ExecTests extends ParseTests {
     //
     // FIXME: more tests here...
 
-    test ("APP EXP: tail(List(2, 1, 4))") {
-        execTest ("""
-            |tail(List(2, 1, 4))
-            """.stripMargin,
-            "List(1, 4)")
+    test("START OF ADDITIONAL TESTS: Pre-defined list operation and user-defined list operation - Tail") {
+        execTest("""
+        {
+            val arr: List[Int] = List(1, 2, 3, 4);
+            def listTail(list:List[Int]):List[Int] = list match {
+                case h :: t => t
+                case _ => List(0)
+            };
+            tail(arr) == listTail(arr)
+        }
+        """.stripMargin,
+        "true")
     }
 
-    test ("APP EXP: length(List(2, 1, 4))") {
-        execTest ("""
-            |length(List(2, 1, 4))
-            """.stripMargin,
-            "3")
-    }
+    test("Pre-defined list operation and user-defined list operation - Head") {
+        execTest("""
+        {
+            val arr: List[Int] = List(1, 2, 3, 4);
+            def listHead(list:List[Int]):Int = list match {
+                case h :: t => h
+                case _ => 0
+            };
+            head(arr) == listHead(arr)
+        }
+        """.stripMargin,
+        "true")
+    } 
 
-
+    test("Pre-defined list operation and user-defined list operation - Length") {
+        execTest("""
+        {
+            val arr: List[Int] = List(1, 2, 3, 4);
+            def listLength(list:List[Int]):Int = list match {
+                case h :: t => 1 + listLength(t)
+                case _ => 0
+            };
+            length(arr) == listLength(arr)
+        }
+        """.stripMargin,
+        "true")
+    }       
 
     test ("Perform operation on variable with block statement as value") {
         execTest ("""
@@ -667,6 +693,6 @@ class ExecTests extends ParseTests {
         }
         """.stripMargin,
         "List(2, 1, 7, 8, 9)")
-    }    
+    }  
 }
 
