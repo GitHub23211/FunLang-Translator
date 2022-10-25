@@ -612,26 +612,56 @@ class ExecTests extends ParseTests {
         }
         """.stripMargin,
         "true")
-    }       
+    }
+
+    test("Get list head then cons to existing list") {
+        execTest("""
+        {
+            val arr : List[Int] = List(7, 8, 9);
+            def getHead(l:List[Int]):List[Int] = l match {
+                case h :: t => h
+            };
+            def pushOne(v:List[Int]):List[Int] = 1 :: v;
+            getHead((2::(1 :: arr))) :: pushOne(arr)
+        }
+        """.stripMargin,
+        "List(2, 1, 7, 8, 9)")
+    }      
+
+    test("Fibonnaci function") {
+        execTest("""
+            {
+                val x : Int = 9;
+                def fibonnaci(n:Int):Int = 
+                    n match {
+                        case 0 => 0
+                        case 1 => 1
+                        case _ => fibonnaci(n - 1) + fibonnaci(n - 2)
+                    };
+                fibonnaci(x)
+            } 
+        """.stripMargin,
+        "34")
+    }   
 
     test ("Perform operation on variable with block statement as value") {
         execTest ("""
-            |{
-            |   val num : Int = 90;
-            |   val x: Int = {
-            |       val y : Int = 23;
-            |       def triple(x:Int):Int = x * 3;
-            |       if (triple(y) * triple(y) < triple(triple(y)))
-            |           y
-            |       else
-            |           triple(y)
-            |   };
-            |   def sum(i:Int):Int = i match {
-            |       case 300 => i - num
-            |       case _ => i + num
-            |   };
-            |   sum(x)
-            |}
+            {
+               val num : Int = 90;
+               val x: Int = {
+                   val y : Int = 23;
+                   def triple(x:Int):Int = x * 3;
+                   if (triple(y) * triple(y) < triple(triple(y)))
+                       y
+                   else
+                       triple(y)
+               };
+               def sum(i:Int):Int = i match {
+                   case 300 => i - num
+                   case _ => i + num
+               };
+               sum(x)
+            }
             """.stripMargin,
             "159")
     }
@@ -664,35 +694,5 @@ class ExecTests extends ParseTests {
             """.stripMargin,
             "4")
     }
-
-    test("Fibonnaci function") {
-        execTest("""
-            {
-                val x : Int = 9;
-                def fibonnaci(n:Int):Int = 
-                    n match {
-                        case 0 => 0
-                        case 1 => 1
-                        case _ => fibonnaci(n - 1) + fibonnaci(n - 2)
-                    };
-                fibonnaci(x)
-            } 
-        """.stripMargin,
-        "34")
-    }
-
-    test("Get list head then cons to existing list") {
-        execTest("""
-        {
-            val arr : List[Int] = List(7, 8, 9);
-            def getHead(l:List[Int]):List[Int] = l match {
-                case h :: t => h
-            };
-            def pushOne(v:List[Int]):List[Int] = 1 :: v;
-            getHead((2::(1 :: arr))) :: pushOne(arr)
-        }
-        """.stripMargin,
-        "List(2, 1, 7, 8, 9)")
-    }  
 }
 
