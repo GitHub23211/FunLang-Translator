@@ -586,7 +586,7 @@ class ExecTests extends ParseTests {
             "3")
     }
 
-    
+
 
     test ("Perform operation on variable with block statement as value") {
         execTest ("""
@@ -653,6 +653,20 @@ class ExecTests extends ParseTests {
             } 
         """.stripMargin,
         "34")
+    }
+
+    test("Get list head then cons to existing list") {
+        execTest("""
+        {
+            val arr : List[Int] = List(1, 2, 3);
+            def getHead(l:List[Int]):List[Int] = l match {
+                case h :: t => h
+            };
+            def pushOne(v:List[Int]):List[Int] = 1 :: v;
+            getHead((2::(1 :: arr))) :: pushOne(arr)
+        }
+        """.stripMargin,
+        "List(2, 1, 1, 2, 3)")
     }    
 }
 
