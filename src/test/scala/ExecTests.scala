@@ -586,7 +586,9 @@ class ExecTests extends ParseTests {
             "3")
     }
 
-    test ("Assign block statements to value") {
+    
+
+    test ("Perform operation on variable with block statement as value") {
         execTest ("""
             |{
             |   val num : Int = 90;
@@ -608,7 +610,7 @@ class ExecTests extends ParseTests {
             "159")
     }
 
-    test ("Multiple and bracketed block statements") {
+    test ("Operate on multiple and bracketed block statements") {
         execTest ("""
             {
                 val a : Int = 5;
@@ -651,10 +653,6 @@ class ExecTests extends ParseTests {
             } 
         """.stripMargin,
         "34")
-    }
-
-
-
-    
+    }    
 }
 
