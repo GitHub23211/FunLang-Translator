@@ -710,7 +710,7 @@ class ExecTests extends ParseTests {
     test ("Translate bits into an integer") {
         execTest ("""
             {
-                val bits : List[Int] = List(1, 1, 0, 0, 1, 0, 1);
+                val bits : List[Int] = List(1, 1, 1, 0, 0, 1, 0, 1);
                 def powerOfTwo(n:Int):Int = n match {
                     case 0 => 1
                     case _ => 2 * powerOfTwo(n - 1)
@@ -727,7 +727,7 @@ class ExecTests extends ParseTests {
                 translateBits(bits)
             }
             """.stripMargin,
-            "101")
+            "229")
     }
 }
 
