@@ -695,7 +695,7 @@ class ExecTests extends ParseTests {
             "4")
     }
 
-    test ("Translate def function to val function and operate with it") {
+    test ("Operate with both val and def functions") {
         execTest ("""
             {
                val a : Int = 100;
