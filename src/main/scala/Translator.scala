@@ -272,19 +272,6 @@ object Translator {
         case MatchExp(exp, cases) => 
             genall(translateExpression(AppExp(LamExp(IdnDef("x", UnknownType()), translateCases(cases, exp)), exp)))
 
-
-
-        // FIXME
-        // handle:
-        //    IfExp
-        //    AppExp - "head" (exp)
-        //           - "tail" (exp)
-        //           - "length" (exp)
-        //           - all other: exp (exp)
-        //    ListExp
-        //    BlockExp
-        //    MatchExp
-
         case _ =>
             gen (IPrint ())
         }

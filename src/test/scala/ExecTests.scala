@@ -626,6 +626,31 @@ class ExecTests extends ParseTests {
         }
         """.stripMargin,
         "List(2, 1, 7, 8, 9)")
+    }
+        
+    test ("If expression in match") {
+        execTest ("""
+            {
+                def fun1(x:Int):Int = x match {
+                    case x => if (x < 1) 1 else fun1(x - 1)
+                };
+                fun1(5)
+            }
+            """.stripMargin,
+            "1")
+    }
+
+    test ("If expression in match with list") {
+        execTest ("""
+            {
+                def fun1(x:List[Int]):Int = x match {
+                    case h :: t => if (h == 1) 1 else fun1(t)
+                    case _ => 999
+                };
+                fun1(List(5, 4, 3, 2, 0))
+            }
+            """.stripMargin,
+            "999")
     }      
 
     test("Fibonnaci function") {
@@ -644,7 +669,7 @@ class ExecTests extends ParseTests {
         "34")
     }   
 
-    test ("Perform operation on variable with block statement as value") {
+    test ("Perform operation on variables with block statements as value") {
         execTest ("""
             {
                val num : Int = 90;
@@ -730,30 +755,48 @@ class ExecTests extends ParseTests {
             "229")
     }
 
-    
-    test ("If expression in match") {
+    test ("Block scope and variables with block statements as values") {
         execTest ("""
             {
-                def fun1(x:Int):Int = x match {
-                    case x => if (x < 1) 1 else fun1(x - 1)
+                def powerOfTwo(n:Int):Int = n match {
+                    case 0 => 1
+                    case _ => 2 * powerOfTwo(n - 1)
                 };
-                fun1(5)
-            }
-            """.stripMargin,
-            "1")
-    }
+                def getLength(l:List[Int]):Int = l match {
+                    case h :: t => 1 + getLength(t)
+                    case _ => 0
+                };
+                def translateBits(l:List[Int]):Int = l match {
+                        case 1::t => powerOfTwo(getLength(l) - 1) + translateBits(t)
+                        case 0::t => translateBits(t)
+                        case _ => 0
+                };
 
-    test ("If expression in match with list") {
-        execTest ("""
-            {
-                def fun1(x:List[Int]):Int = x match {
-                    case h :: t => if (h == 1) 1 else fun1(t)
-                    case _ => 999
+                val x : Int = {
+                        val bits : List[Int] = List(1, 0, 1, 0);
+                        translateBits(bits)
                 };
-                fun1(List(5, 4, 3, 2, 0))
+
+                val y : Int = {
+
+                    val arr : List[Int] = List(1, 2, 3, 4);
+
+                    val addList:Int = (x: List[Int]) => x match {
+                        case h :: t => h + addList(t)
+                        case _ => 0
+                    };
+
+                    val z : Int = {
+                        val multiplyFive:Int = (x:Int) => x * 5;
+                        multiplyFive(addList(arr))
+                    };
+                    z
+                };
+
+                x * y
             }
             """.stripMargin,
-            "999")
+            "500")
     }
 }
 
