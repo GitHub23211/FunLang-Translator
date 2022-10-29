@@ -790,13 +790,14 @@ class ExecTests extends ParseTests {
                         val multiplyFive:Int = (x:Int) => x * 5;
                         multiplyFive(addList(arr))
                     };
-                    z
+                    
+                    if (z == 50) 0 else 1
                 };
 
                 x * y
             }
             """.stripMargin,
-            "500")
+            "0")
     }
 }
 
