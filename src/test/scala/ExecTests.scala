@@ -694,5 +694,40 @@ class ExecTests extends ParseTests {
             """.stripMargin,
             "4")
     }
+
+    test ("Translate def function to val function and operate with it") {
+        execTest ("""
+            {
+               val a : Int = 100;
+               val multiplyTen : Int = (num:Int) => num * 10;
+               def sum(i:Int):Int = i + 50;
+               multiplyTen(sum(a))
+            }
+            """.stripMargin,
+            "1500")
+    }
+
+    test ("Translate bits into an integer") {
+        execTest ("""
+            {
+                val bits : List[Int] = List(1, 1, 0, 0, 1, 0, 1);
+                def powerOfTwo(n:Int):Int = n match {
+                    case 0 => 1
+                    case _ => 2 * powerOfTwo(n - 1)
+                };
+                def getLength(l:List[Int]):Int = l match {
+                    case h :: t => 1 + getLength(t)
+                    case _ => 0
+                };
+                def translateBits(l:List[Int]):Int = l match {
+                        case 1::t => powerOfTwo(getLength(l) - 1) + translateBits(t)
+                        case 0::t => translateBits(t)
+                        case _ => 0
+                    };
+                translateBits(bits)
+            }
+            """.stripMargin,
+            "101")
+    }
 }
 
