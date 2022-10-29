@@ -729,5 +729,31 @@ class ExecTests extends ParseTests {
             """.stripMargin,
             "229")
     }
+
+    
+    test ("If expression in match") {
+        execTest ("""
+            {
+                def fun1(x:Int):Int = x match {
+                    case x => if (x < 1) 1 else fun1(x - 1)
+                };
+                fun1(5)
+            }
+            """.stripMargin,
+            "1")
+    }
+
+    test ("If expression in match with list") {
+        execTest ("""
+            {
+                def fun1(x:List[Int]):Int = x match {
+                    case h :: t => if (h == 1) 1 else fun1(t)
+                    case _ => 999
+                };
+                fun1(List(5, 4, 3, 2, 0))
+            }
+            """.stripMargin,
+            "999")
+    }
 }
 
